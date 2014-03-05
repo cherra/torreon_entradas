@@ -1,0 +1,8 @@
+#Netbeans
+nbproject
+
+# Object files
+*.o
+
+# Executables
+entradas

@@ -1,0 +1,20 @@
+Versión 0.4.3
+20/julio/2012
+* Se agregó el stock sugerido por Subproducto
+* Se corrigieron errores:
+	- Al obtener el listado de articulos mostraba los artículos desactivados (codigo NULL).
+	- Al imprimir el stock sugerido por presentación sacaba del sistema cuando en la consulta había artículos desactivados.
+
+Versión 0.4.2
+18/junio/2012
+* Se modificó la forma como se leen los códigos de barras.
+*	Si el primer digito es un 9 se consideran 3 digitos para los kilos, de
+lo contrario solo se consideran 2 (cuando el codigo viene de una bascula).
+Versión 0.4
+22/marzo/2012
+* Se agregó el reporte de stock sugerido para los proximos 3 días
+
+Versión 0.4.1
+23/marzo/2012
+* Se modificó el formato del reporte de stock sugerido:
+	- Se agregó parte del nombre del producto.
