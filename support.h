@@ -19,6 +19,7 @@ char file_db_config[128];  // Variable para almacenar la ruta del archivo de con
 
 // Variables de configuración para el módulo de impresión.
 char ImpresoraConfig[256], TicketImpresion[256];
+char id_usuario[64];
 
 /* Definición principal de la esctructura de datos */
 typedef struct _Data Data;

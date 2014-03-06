@@ -22,7 +22,8 @@ main( int    argc,
         
         homedir = getenv("HOME");  // Directorio Home del usuario
         strcpy(uifile, homedir);
-        strcat(uifile, "/.carnesbecerra/entradas.glade"); // Archivo donde se define la interface
+        strcat(uifile, "/entradas.glade"); // Archivo donde se define la interface
+        //strcpy(uifile, "entradas.glade"); // Archivo donde se define la interface
         
 	/* Init GTK+ */
 	gtk_init( &argc, &argv );

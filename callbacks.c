@@ -17,14 +17,17 @@ void inicializa_variables( GtkWidget *widget, Data *data )
     printf("Inicializando variables....\n");
     
     strcpy(file_db_config, homedir);
-    strcat(file_db_config, "/.carnesbecerra/configuracionbd.dat");
+    strcat(file_db_config, "/configuracionbd.dat");
+    //strcpy(file_db_config, "configuracionbd.dat");
     /*
      * Se inicializan las variables de configuración para impresiones
      */
     strcpy(ImpresoraConfig, homedir);
-    strcat(ImpresoraConfig, "/.carnesbecerra/impresoras.conf");
+    //strcat(ImpresoraConfig, "/impresoras.conf");
+    strcat(ImpresoraConfig, "/impresion_conf/impresoras_almacen.conf");
     strcpy(TicketImpresion, homedir);
-    strcat(TicketImpresion, "/.carnesbecerra/impresion/impresiones-entradas-tmp.txt");
+    strcat(TicketImpresion, "/impresion/impresiones-entradas-tmp.txt");
+    //strcat(TicketImpresion, "impresion/impresiones-entradas-tmp.txt");
     
     printf("Listo!\n");
         
@@ -144,6 +147,8 @@ void on_txtpassword_activate( GtkWidget *widget, Data *data )
 					gtk_widget_destroy( data->windowLogin );
 					if( row2 = mysql_fetch_row(res2) )
 					{
+                                            strcpy(id_usuario, row2[0]);
+                                            printf("Inició sesión el usuario %s\n", id_usuario);
 						nombre = g_strdup_printf("Bienvenido %s", row2[1]);
 						gtk_statusbar_push( GTK_STATUSBAR( data->statusbar ), 1, nombre );
 						g_free( nombre );
@@ -165,7 +170,7 @@ gboolean agrega_articulo( const char *codigo, Data *data )
 {
 	gchar *barcode;
 	const char *cantidad;
-	char codigo_subproducto[4], codigo_articulo[2], kilos[4], bascula[3], gramos[3], vendedor[3], peso[6], tipo_codigo[2];
+	char codigo_articulo[5], kilos[4], bascula[3], gramos[3], vendedor[3], peso[6], tipo_codigo[2];
 	char sqlarticulo[200];
 
 
@@ -175,9 +180,9 @@ gboolean agrega_articulo( const char *codigo, Data *data )
 		{
 			if( !(ya_codigo) )
 			{
-				barcode = gtk_editable_get_chars(GTK_EDITABLE(data->txtcodigo), 0, 3);
-			        strcpy(codigo_subproducto, barcode);
-			        barcode = gtk_editable_get_chars(GTK_EDITABLE(data->txtcodigo), 3, 4);
+				barcode = gtk_editable_get_chars(GTK_EDITABLE(data->txtcodigo), 0, 4);
+//			        strcpy(codigo_subproducto, barcode);
+//			        barcode = gtk_editable_get_chars(GTK_EDITABLE(data->txtcodigo), 3, 4);
 			        strcpy(codigo_articulo, barcode);
 				gtk_label_set_markup(GTK_LABEL( data->lblcodigo ), "Cantidad: ");
 				ya_codigo = TRUE;
@@ -197,9 +202,9 @@ gboolean agrega_articulo( const char *codigo, Data *data )
 		{
 			barcode = gtk_editable_get_chars(GTK_EDITABLE(data->txtcodigo), 0, 1);
 			strcpy(tipo_codigo, barcode);
-			barcode = gtk_editable_get_chars(GTK_EDITABLE(data->txtcodigo), 1, 4);
-			strcpy(codigo_subproducto, barcode);
-			barcode = gtk_editable_get_chars(GTK_EDITABLE(data->txtcodigo), 4, 5);
+			barcode = gtk_editable_get_chars(GTK_EDITABLE(data->txtcodigo), 1, 5);
+    //			strcpy(codigo_subproducto, barcode);
+    //			barcode = gtk_editable_get_chars(GTK_EDITABLE(data->txtcodigo), 4, 5);
 			strcpy(codigo_articulo, barcode);
 			if(strcmp(tipo_codigo,"9") == 0){
 				barcode = gtk_editable_get_chars(GTK_EDITABLE(data->txtcodigo), 5, 8);
@@ -215,7 +220,7 @@ gboolean agrega_articulo( const char *codigo, Data *data )
 			barcode = gtk_editable_get_chars(GTK_EDITABLE(data->txtcodigo), 10, 12);
 			strcpy(vendedor, barcode);
 			sprintf(peso, "%d.%s", atoi(kilos), gramos);
-			printf("El codigo: %s%s\n", codigo_subproducto, codigo_articulo);
+			printf("El codigo: %s\n", codigo_articulo);
 			
 			ya_codigo = TRUE;
 		}
@@ -224,7 +229,7 @@ gboolean agrega_articulo( const char *codigo, Data *data )
 			if(conecta_bd() == 1)
 			{
 				printf("Se conecta a la base de datos\n");
-				sprintf(sqlarticulo,"SELECT Articulo.nombre, Articulo.id_articulo FROM Articulo INNER JOIN Subproducto ON Articulo.id_subproducto = Subproducto.id_subproducto WHERE Articulo.codigo = '%s' AND Subproducto.codigo = '%s'", codigo_articulo, codigo_subproducto);
+				sprintf(sqlarticulo,"SELECT Articulo.nombre, Articulo.id_articulo FROM Articulo WHERE Articulo.codigo = '%s'", codigo_articulo);
 				printf("Cadena SQL: %s\n", sqlarticulo);
 				er = mysql_query(&mysql, sqlarticulo);
 				if(er == 0)
@@ -235,17 +240,17 @@ gboolean agrega_articulo( const char *codigo, Data *data )
 						if(mysql_num_rows(res)>0)
 						{
 							printf("Bien el SQL\n");
-							strcat(codigo_subproducto, codigo_articulo);
+							//strcat(codigo_subproducto, codigo_articulo);
 							row = mysql_fetch_row(res);
 							gtk_list_store_append( data->liststoreArticulos, &iter_articulos);
 							if( strlen( codigo ) < 13 )
 							{
-								gtk_list_store_set( data->liststoreArticulos, &iter_articulos, 0, row[1], 1, codigo_subproducto, 2, row[0], -1);
+								gtk_list_store_set( data->liststoreArticulos, &iter_articulos, 0, row[1], 1, codigo_articulo, 2, row[0], -1);
 								gtk_widget_set_sensitive( GTK_WIDGET( data->btnGuardar ), FALSE );
 							}
 							else
 							{
-								gtk_list_store_set( data->liststoreArticulos, &iter_articulos, 0, row[1], 1, codigo_subproducto, 2, row[0], 3, peso, -1);
+								gtk_list_store_set( data->liststoreArticulos, &iter_articulos, 0, row[1], 1, codigo_articulo, 2, row[0], 3, peso, -1);
 								ya_codigo = FALSE;
 							}
 						}
@@ -419,7 +424,7 @@ gboolean carga_articulos( const char *filtro, Data *data )
 	gchararray nombre;
 	GError *error;
 
-	sprintf( sql, "SELECT CONCAT(Subproducto.codigo, Articulo.codigo), Articulo.nombre FROM Articulo INNER JOIN Subproducto USING(id_subproducto) WHERE Articulo.nombre LIKE '%%%s%%' AND Articulo.id_linea NOT IN( 0, 10 ) AND Articulo.codigo IS NOT NULL ORDER BY Articulo.nombre LIMIT 100",filtro );
+	sprintf( sql, "SELECT Articulo.codigo, Articulo.nombre FROM Articulo WHERE Articulo.nombre LIKE '%%%s%%' AND Articulo.codigo IS NOT NULL ORDER BY Articulo.nombre LIMIT 100",filtro );
 	//g_print("El SQL para obtener lista de proveedores: %s\n", sql);
 
 	if( conecta_bd() == -1 )
@@ -585,7 +590,7 @@ void on_btnGuardar_clicked( GtkButton *btnGuardar, Data *data )
     					gtk_tree_model_get(model, &iter, 0, &id_proveedor, -1);
 					printf("Proveedor seleccionado: %s\n", id_proveedor);
   				}
-				sprintf( sql, "INSERT INTO Entrada_Almacen ( id_usuario, id_proveedor, fecha ) VALUES( 1, %s, NOW() )", id_proveedor );
+				sprintf( sql, "INSERT INTO Entrada_Almacen ( id_usuario, id_proveedor, fecha ) VALUES( %s, %s, NOW() )", id_usuario, id_proveedor );
 	
 				if( conecta_bd() == -1 )
    			 	{

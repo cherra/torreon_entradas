@@ -877,7 +877,7 @@ int imprimirticket(char *id_venta_char, char tipo[20], double pago_num, ...){
 */
 		fpt2 = fopen(ImpresoraConfig,"r");
 		if(fpt2 == NULL){
-			printf("\nERROR no se puede abrir el archivo de configuracion de las impresoras");
+			printf("\nERROR no se puede abrir el archivo de configuracion de las impresoras: %s\n",ImpresoraConfig);
 			imprimiendo = FALSE;
 			return (1);
 		}else{
@@ -925,6 +925,7 @@ int imprimirticket(char *id_venta_char, char tipo[20], double pago_num, ...){
 /*
 TERMINA LA CONFIGURACION DE LA IMPRESORA*/
 
+                printf("Tipo de impresión: %s\n",tipo);    
 	if(strcmp(tipo, "entrada_almacen") == 0){
 
 		fpt = fopen(TicketImpresion,"w");
@@ -939,7 +940,7 @@ TERMINA LA CONFIGURACION DE LA IMPRESORA*/
 			imprimir(resetea,nX);
 			imprimir(alinea_c, nX);
 			imprimir(negrita,nX);
-			imprimir("CARNES BECERRA",nX);
+			imprimir("EL TORREON",nX);
 			imprimir(cancela,nX);
 			imprimir(salto,nX);
 			imprimir(alinea_c, nX);
@@ -994,7 +995,7 @@ TERMINA LA CONFIGURACION DE LA IMPRESORA*/
 								printf("\nError al imprimir la entrada de almacen");
 							}
 						}
-						sprintf(sql, "SELECT CONCAT(LEFT(CONCAT(Subproducto.codigo,Articulo.codigo,' ',Articulo.nombre),%d), SPACE( %d-LENGTH( LEFT( CONCAT( Subproducto.codigo,Articulo.codigo,' ',Articulo.nombre),%d ) ) )), FORMAT(Entrada_Almacen_Articulo.cantidad,3), Articulo.tipo FROM Entrada_Almacen_Articulo INNER JOIN Articulo ON Entrada_Almacen_Articulo.id_articulo = Articulo.id_articulo INNER JOIN Subproducto ON Articulo.id_subproducto = Subproducto.id_subproducto WHERE Entrada_Almacen_Articulo.id_entrada = %s ORDER BY Entrada_Almacen_Articulo.id_entrada_almacen_articulo", nX-12, nX-12, nX-12, id_venta);
+						sprintf(sql, "SELECT CONCAT(LEFT(CONCAT(Articulo.codigo,' ',Articulo.nombre),%d), SPACE( %d-LENGTH( LEFT( CONCAT( Articulo.codigo,' ',Articulo.nombre),%d ) ) )), FORMAT(Entrada_Almacen_Articulo.cantidad,3), Articulo.tipo FROM Entrada_Almacen_Articulo INNER JOIN Articulo ON Entrada_Almacen_Articulo.id_articulo = Articulo.id_articulo WHERE Entrada_Almacen_Articulo.id_entrada = %s ORDER BY Entrada_Almacen_Articulo.id_entrada_almacen_articulo", nX-12, nX-12, nX-12, id_venta);
 						printf("\nConsulta2: %s\n", sql);
       						err = mysql_query(&mysql, sql);
 						if(err == 0)
@@ -1120,6 +1121,7 @@ TERMINA LA CONFIGURACION DE LA IMPRESORA*/
 	}
 	else if(strcmp(tipo, "stock_3_dias") == 0){
 
+            printf("Procesando reporte...\n");
 		fpt = fopen(TicketImpresion,"w");
 		if(fpt == NULL){
 			printf("\nERROR no se puede abrir el archivo a imprimir");
@@ -1132,7 +1134,7 @@ TERMINA LA CONFIGURACION DE LA IMPRESORA*/
 			imprimir(resetea,nX);
 			imprimir(alinea_c, nX);
 			imprimir(negrita,nX);
-			imprimir("CARNES BECERRA",nX);
+			imprimir("EL TORREON",nX);
 			imprimir(cancela,nX);
 			imprimir(salto,nX);
 			imprimir(alinea_c, nX);
@@ -1183,7 +1185,7 @@ TERMINA LA CONFIGURACION DE LA IMPRESORA*/
 
 				imprimir(salto,nX);
 
-				sprintf(sql, "SELECT Articulo.id_articulo, IF(Articulo.codigo IS NOT NULL,LEFT(CONCAT(Subproducto.codigo, Articulo.codigo,' ',Articulo.nombre),16),LEFT(CONCAT('     ',Articulo.nombre),16)) AS Codigo FROM Articulo INNER JOIN Subproducto USING (id_subproducto) WHERE Articulo.inventariado = 's' ORDER BY Articulo.nombre");
+				sprintf(sql, "SELECT Articulo.id_articulo, IF(Articulo.codigo IS NOT NULL,LEFT(CONCAT(Articulo.codigo,' ',Articulo.nombre),16),LEFT(CONCAT('     ',Articulo.nombre),16)) AS Codigo FROM Articulo ORDER BY Articulo.nombre");
 				printf("\nConsulta: %s\n", sql);
 				//printf("\nTicket para el carnicero\n\n\n");
 				err = mysql_query(&mysql, sql);
@@ -1215,7 +1217,7 @@ TERMINA LA CONFIGURACION DE LA IMPRESORA*/
 
 								// Existencia
 
-								sprintf(sql,"SELECT IFNULL(MAX(Inventario_Inicial_Presentacion.fecha),MIN(Entrada_Almacen.fecha)) as fecha, CONCAT(DATE(MAX(Inventario_Inicial_Presentacion.fecha)),' / ', TIME(MAX(Inventario_Inicial_Presentacion.fecha))), CONCAT(Subproducto.codigo,Articulo.codigo) as codigo FROM Articulo INNER JOIN Subproducto ON Articulo.id_subproducto = Subproducto.id_subproducto LEFT JOIN Inventario_Inicial_Presentacion ON Articulo.id_articulo = Inventario_Inicial_Presentacion.id_articulo LEFT JOIN Entrada_Almacen_Articulo ON Articulo.id_articulo = Entrada_Almacen_Articulo.id_articulo LEFT JOIN Entrada_Almacen ON Entrada_Almacen_Articulo.id_entrada = Entrada_Almacen.id_entrada WHERE 1 AND Articulo.id_articulo = %s AND (Articulo.id_articulo = ANY ( SELECT id_articulo FROM Entrada_Almacen_Articulo GROUP BY id_articulo ) OR Articulo.id_articulo = ANY ( SELECT id_articulo FROM Inventario_Inicial_Presentacion GROUP BY id_articulo )) GROUP BY Articulo.id_articulo ORDER BY Articulo.nombre",row[0]);
+								sprintf(sql,"SELECT IFNULL(MAX(Inventario_Inicial_Presentacion.fecha),MIN(Entrada_Almacen.fecha)) as fecha, CONCAT(DATE(MAX(Inventario_Inicial_Presentacion.fecha)),' / ', TIME(MAX(Inventario_Inicial_Presentacion.fecha))), Articulo.codigo as codigo FROM Articulo LEFT JOIN Inventario_Inicial_Presentacion ON Articulo.id_articulo = Inventario_Inicial_Presentacion.id_articulo LEFT JOIN Entrada_Almacen_Articulo ON Articulo.id_articulo = Entrada_Almacen_Articulo.id_articulo LEFT JOIN Entrada_Almacen ON Entrada_Almacen_Articulo.id_entrada = Entrada_Almacen.id_entrada WHERE 1 AND Articulo.id_articulo = %s AND (Articulo.id_articulo = ANY ( SELECT id_articulo FROM Entrada_Almacen_Articulo GROUP BY id_articulo ) OR Articulo.id_articulo = ANY ( SELECT id_articulo FROM Inventario_Inicial_Presentacion GROUP BY id_articulo )) GROUP BY Articulo.id_articulo ORDER BY Articulo.nombre",row[0]);
 								//printf("\nConsulta: %s\n", sql);
 								err = mysql_query(&mysql, sql);
 								if(err == 0)
@@ -1223,7 +1225,7 @@ TERMINA LA CONFIGURACION DE LA IMPRESORA*/
 									resultado2 = mysql_store_result(&mysql);
 									if(resultado2){
 										if((row2 = mysql_fetch_row(resultado2))){
-											sprintf(sql,"SELECT IFNULL((SELECT cantidad FROM Inventario_Inicial_Presentacion WHERE id_articulo = %s ORDER BY fecha DESC LIMIT 1),0), IFNULL((SELECT SUM(Entrada_Almacen_Articulo.cantidad) FROM Entrada_Almacen_Articulo INNER JOIN Entrada_Almacen USING(id_entrada) WHERE Entrada_Almacen_Articulo.id_articulo = %s AND Entrada_Almacen.fecha BETWEEN '%s' AND CONCAT(CURDATE(),' 23:59:59') AND Entrada_Almacen.cancelada = 'n'),0), (SELECT IFNULL((SELECT SUM(Venta_Articulo.cantidad) FROM Venta_Articulo INNER JOIN Venta USING(id_venta) WHERE CONCAT(Venta.fecha,' ',Venta.hora) BETWEEN '%s' AND CONCAT(CURDATE(),' 23:59:59') AND Venta_Articulo.id_articulo = %s AND Venta.cancelada = 'n'),0) + IFNULL((SELECT SUM(SalidasVarias_Articulo.cantidad) FROM SalidasVarias_Articulo INNER JOIN SalidasVarias USING(id_venta) WHERE CONCAT(SalidasVarias.fecha,' ',SalidasVarias.hora) BETWEEN '%s' AND CONCAT(CURDATE(),' 23:59:59') AND SalidasVarias_Articulo.id_articulo = %s AND SalidasVarias.cancelada = 'n'),0) + IFNULL((SELECT SUM(Pruebas_Articulo.cantidad) FROM Pruebas_Articulo INNER JOIN Pruebas USING(id_venta) WHERE CONCAT(Pruebas.fecha,' ',Pruebas.hora) BETWEEN '%s' AND CONCAT(CURDATE(),' 23:59:59') AND Pruebas_Articulo.id_articulo = %s AND Pruebas.cancelada = 'n'),0))",row[0],row[0],row2[0],row2[0],row[0],row2[0],row[0],row2[0],row[0]);
+											sprintf(sql,"SELECT IFNULL((SELECT cantidad FROM Inventario_Inicial_Presentacion WHERE id_articulo = %s ORDER BY fecha DESC LIMIT 1),0), IFNULL((SELECT SUM(Entrada_Almacen_Articulo.cantidad) FROM Entrada_Almacen_Articulo INNER JOIN Entrada_Almacen USING(id_entrada) WHERE Entrada_Almacen_Articulo.id_articulo = %s AND Entrada_Almacen.fecha BETWEEN '%s' AND CONCAT(CURDATE(),' 23:59:59') AND Entrada_Almacen.cancelada = 'n'),0), (SELECT IFNULL((SELECT SUM(Venta_Articulo.cantidad) FROM Venta_Articulo INNER JOIN Venta USING(id_venta) WHERE CONCAT(Venta.fecha,' ',Venta.hora) BETWEEN '%s' AND CONCAT(CURDATE(),' 23:59:59') AND Venta_Articulo.id_articulo = %s AND Venta.cancelada = 'n'),0) + IFNULL((SELECT SUM(Salida_Articulo.cantidad) FROM Salida_Articulo INNER JOIN Salida USING(id_venta) WHERE CONCAT(Salida.fecha,' ',Salida.hora) BETWEEN '%s' AND CONCAT(CURDATE(),' 23:59:59') AND Salida_Articulo.id_articulo = %s AND Salida.cancelada = 'n'),0))",row[0],row[0],row2[0],row2[0],row[0],row2[0],row[0]);
 											//printf("\nConsulta: %s\n", sql);
 											err = mysql_query(&mysql,sql);
 											if(err == 0){
@@ -1419,7 +1421,7 @@ TERMINA LA CONFIGURACION DE LA IMPRESORA*/
 			imprimir(resetea,nX);
 			imprimir(alinea_c, nX);
 			imprimir(negrita,nX);
-			imprimir("CARNES BECERRA",nX);
+			imprimir("EL TORREON",nX);
 			imprimir(cancela,nX);
 			imprimir(salto,nX);
 			imprimir(alinea_c, nX);
